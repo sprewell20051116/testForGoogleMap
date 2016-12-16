@@ -19,20 +19,250 @@
     <div id="map"></div>
     <script>
 
-function initMap() {
-  var myLatLng = {lat: -25.363, lng: 131.044};
+    var newlng ;
+    var newlat ;
+    var map;
+    var marker={};
+    var m;
+    var m_language;
+    var nosingnal;
+    var p;
+    var p1;
+    var points=[];
+    var JpgNumList=[];
+    var flagdraw;
+    var flag_status;
+    var lastJpgNum=-1;
 
-  var map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 4,
-    center: myLatLng
-  });
+    function DoLogAction() {
+        if ( console ) {
+            /* calls our Objective-C console logging function */
+//            console.log("map_x: " + console.StartLatValue +
+//                        "map_y: " + console.StartLngValue);
+            alert(console.setscript("happy happy"));
+        }
+    }
 
-  var marker = new google.maps.Marker({
-    position: myLatLng,
-    map: map,
-    title: 'Hello World!'
-  });
-}
+    function SampleFunction(parameterOne, parameterTwo) {
+		/* put the values we received in parameters into the two spans */
+        alert("happy happy");
+        //return 'done!';
+    }
+
+    function web_refresh()
+    {
+
+    }
+    function initialize() {
+        //var startlng =  window.controller.StartLngValue;
+        var startlat =  window.controller.StartLatValue;
+        var startlng =  window.controller.StartLngValue;
+        // avoid bad valus
+        if(startlat!=0 && startlng!=0) {
+            newlng = window.controller.LngValue;
+            newlat = window.controller.LatValue;
+            var myOptions = {
+                zoom: 16,
+                center: new google.maps.LatLng(startlat, startlng),
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                streetViewControl: true
+            }
+            window.onerror=function(){return true;};
+            map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+            show();
+        }
+    }
+
+    function show() {
+        valid   = document.getElementById("map_valid").value;
+        flag_status = document.getElementById("map_status").value.toLowerCase();
+        //
+        if(window.controller.LngValue != 0 &&
+           window.controller.LatValue != 0 &&
+           Math.abs(window.controller.LngValue-newlng)<5 &&
+           Math.abs(window.controller.LatValue-newlat)<5 ){
+            // always keep valid position
+            newlng  = window.controller.LngValue;
+            newlat  = window.controller.LatValue;
+
+            if((flag_status != "pause")&&(flag_status != "stop"))
+            {
+                var myLatLng = new google.maps.LatLng(newlat,newlng);
+                // you can draw second line here
+                /*
+                if(p==null) {
+                    Createline();
+                }
+                */
+                CreateMarker(myLatLng);
+            }
+        }
+        window.setTimeout(function(){ show();},1000);
+    }
+
+    function CreateMarker(LatLng){
+        var point = LatLng;
+
+        flagdraw = new Number(document.getElementById("flag_draw").value);
+
+        if(flagdraw==1)
+        {
+            var recMidindxTemp = window.external.JS2C_GetrecMidindx();
+            var i;
+            var jpgnum = window.external.JS2C_GetJpgNum();
+            if(lastJpgNum==jpgnum)
+            return;
+            else
+            lastJpgNum = jpgnum;
+            //window.external.DebugView("jpgnum="+jpgnum+" JpgNumList.length="+JpgNumList.length);
+            //window.external.DebugView("points.length="+points.length);
+            for (i=0; i < JpgNumList.length; i++)
+            {
+                if(jpgnum<JpgNumList[i])
+                break;
+            }
+            if(i>=JpgNumList.length)    //當全找完,設為最後一個
+            i = JpgNumList.length - 1;
+            window.external.DebugView("i="+i+" jpgnum="+jpgnum);
+            var RoteRoad = points.slice(0, i+1);
+
+            //            if(p1!=null)
+            //                p1.setMap(null);
+            if(p1==null)
+            {
+                p1 = new google.maps.Polyline({
+                                              clickable: false,
+                                              geodesic:false,
+                                              map:map,
+                                              path: RoteRoad,
+                                              strokeColor: "#0000FF",
+                                              strokeOpacity: 0.5,
+                                              strokeWeight: 4
+                                              });
+            }
+            else
+            {
+                p1.setPath(RoteRoad);
+            }
+
+            if(jpgnum==0)
+            point = RoteRoad[i];
+        }
+
+        map.panTo(point);
+        // cancel previouse marker
+        if(m!=null)
+            m.setMap(null);
+        // new marker
+        m = new google.maps.Marker({
+                                   position: point,
+                                   map: map
+                                   });
+    }
+
+    function Createline(){
+        points.length = 0;
+        JpgNumList.length = 0;
+
+        if(p!=null)
+        p.setMap(null);
+
+        flagdraw = new Number(document.getElementById("flag_draw").value);
+        flagdraw = 0;
+        if(flagdraw==1)
+        {
+            var GPSList = new VBArray(window.external.JS2C_GetGPSData()).toArray();
+            if(GPSList.length <= 1) return;
+
+            for (var i=0; i < GPSList.length-1;)
+            {
+                var myLatLng = new google.maps.LatLng(GPSList[i],GPSList[i+1]);
+                points.push(myLatLng);
+                JpgNumList.push(GPSList[i+2]);
+                i=i+3;
+            }
+
+            p = new google.maps.Polyline({
+                                         clickable: false,
+                                         geodesic:false,
+                                         map:map,
+                                         path: points,
+                                         strokeColor: "#FF0000",
+                                         strokeOpacity: 0.5,
+                                         strokeWeight: 4
+                                         });
+            var indexClipTframe = GPSList[GPSList.length-1];    //目前GPS累計個數,用來標示Mark點
+            if(indexClipTframe>=points.length)
+            indexClipTframe = points.length-1;
+            window.external.DebugView("indexClipTframe="+indexClipTframe);
+
+            CreateMaker(points[indexClipTframe]);
+        }
+    }
+    function DrawDrivingLine(parameter){
+        // parameter will be a string in array[0]
+        var GPSListString = parameter;
+        var GPSList = GPSListString.split(",");
+        var lng,lat,lng_prev,lat_prev,pnt;
+
+        if(GPSList.length <= 1) return;
+        //alert(GPSList.length);
+
+        // remove previous points
+        if(points.length) {
+            points.splice(0,points.length);
+        }
+
+        for (var i=0; i<GPSList.length-1; i+=2)
+        {
+            lng = parseFloat(GPSList[i]);
+            lat = parseFloat(GPSList[i+1]);
+            // initialize previous GPS location
+            if(i==0) {
+                lng_prev = lng;
+                lat_prev = lat;
+            }
+            // non-zero value & offset<5 -> valid GPS location
+            if(lng != 0 &&
+               lat != 0 &&
+               Math.abs(lng-lng_prev)<5 &&
+               Math.abs(lat-lat_prev)<5 ) {
+                lng_prev = lng;
+                lat_prev = lat;
+                var myLatLng = new google.maps.LatLng(lat,lng);
+                points.push(myLatLng);
+            }
+        }
+        // start point
+        pnt = points[0];
+        // pan to new point
+        map.panTo(pnt);
+        // remove previouse marker
+        if(m)
+            m.setMap(null);
+        // new marker
+        m = new google.maps.Marker({
+                                   position: pnt,
+                                   map: map
+                                   });
+        m.setMap(map);
+        // remove previous polyline
+        if(p)
+            p.setMap(null);
+        // new polyline
+        p = new google.maps.Polyline({
+                                     clickable: false,
+                                     geodesic:false,
+                                     map:map,
+                                     path: points,
+                                     strokeColor: "#FF0000",
+                                     strokeOpacity: 0.5,
+                                     strokeWeight: 4
+                                     });
+        p.setMap(map);
+    }
+
+    google.maps.event.addDomListener(window, 'load', initialize);
 
     </script>
 
