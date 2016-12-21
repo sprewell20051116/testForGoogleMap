@@ -35,9 +35,20 @@ function initMap() {
 }
 
     </script>
-
-
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDngCg_PnLEWtvn88U3Mc0rOnYGoo9qh4I&callback=initMap"
         async defer></script>
+    <script src="https://www.gstatic.com/firebasejs/3.6.4/firebase.js"></script>
+    <script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyB8ZvtVD23eL0TznFbhZ0A7H0l3oiemIiI",
+    authDomain: "authorization-c3fa8.firebaseapp.com",
+    databaseURL: "https://authorization-c3fa8.firebaseio.com",
+    storageBucket: "authorization-c3fa8.appspot.com",
+    messagingSenderId: "772770349019"
+  };
+  firebase.initializeApp(config);
+</script>
   </body>
 </html>
+
