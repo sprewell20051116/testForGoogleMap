@@ -1,54 +1,23 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta charset="utf-8">
-    <title>Simple markers</title>
-    <style>
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      #map {
-        height: 100%;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="map"></div>
-    <script>
+    <head>
+        <meta charset="UTF-8">
+        <title>Hello World</title>
+    </head>
+    <body>
 
-function initMap() {
-  var myLatLng = {lat: -25.363, lng: 131.044};
+        <div id="app">
+          {{ message }}
+        </div>
 
-  var map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 4,
-    center: myLatLng
-  });
-
-  var marker = new google.maps.Marker({
-    position: myLatLng,
-    map: map,
-    title: 'Hello World!'
-  });
-}
-
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDngCg_PnLEWtvn88U3Mc0rOnYGoo9qh4I&callback=initMap"
-        async defer></script>
-    <script src="https://www.gstatic.com/firebasejs/3.6.4/firebase.js"></script>
-    <script>
-  // Initialize Firebase
-  var config = {
-    apiKey: "AIzaSyB8ZvtVD23eL0TznFbhZ0A7H0l3oiemIiI",
-    authDomain: "authorization-c3fa8.firebaseapp.com",
-    databaseURL: "https://authorization-c3fa8.firebaseio.com",
-    storageBucket: "authorization-c3fa8.appspot.com",
-    messagingSenderId: "772770349019"
-  };
-  firebase.initializeApp(config);
-</script>
-  </body>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.1/vue.min.js"></script>
+       <script>
+            new Vue({
+                el:'#app',
+                data:{
+                    message:'Hello World!'
+                }
+            });
+        </script>
+    </body>
 </html>
-
